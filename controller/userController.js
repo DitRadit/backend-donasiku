@@ -14,3 +14,12 @@ exports.getProfile = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+exports.getAllUsers = async (req, res) => {
+    try {
+        const user = await User.findAll();
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({message:"Error Fetching Users", error: error.message})
+    }
+}
