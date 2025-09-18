@@ -6,8 +6,9 @@ const User = require('./userModel')(sequelize, Sequelize.DataTypes);
 const Item = require('./itemModel')(sequelize, Sequelize.DataTypes);
 const Request = require('./requestsModel')(sequelize, Sequelize.DataTypes);
 const Donation = require('./donationModel')(sequelize, Sequelize.DataTypes);
-const DonationOffer = require('./donationOfferModel')(sequelize, Sequelize.DataTypes);
 const Document = require('./documentsModel')(sequelize, Sequelize.DataTypes);
+const Community = require('./communityModel')(sequelize, Sequelize.DataTypes);
+const Category = require('./categoryModel')(sequelize, Sequelize.DataTypes);
 
 /* ====== Associations ====== */
 
@@ -20,8 +21,8 @@ Area.hasMany(Item, { foreignKey: 'area_id' });
 Item.belongsTo(Area, { foreignKey: 'area_id' });
 
 // Users - Items
-User.hasMany(Item, { foreignKey: 'user_id' });
-Item.belongsTo(User, { foreignKey: 'user_id' });
+User.hasMany(Item, { foreignKey: "user_id" });
+Item.belongsTo(User, { foreignKey: "user_id" });
 
 // Users - Requests
 User.hasMany(Request, { foreignKey: 'user_id' });
@@ -36,23 +37,39 @@ Item.hasMany(Donation, { foreignKey: 'item_id' });
 Donation.belongsTo(Item, { foreignKey: 'item_id' });
 
 // Donations - Users (donor, receiver)
-User.hasMany(Donation, { foreignKey: 'donor_id', as: 'Donated' });
-User.hasMany(Donation, { foreignKey: 'receiver_id', as: 'Received' });
-Donation.belongsTo(User, { foreignKey: 'donor_id', as: 'DonorUser' });
-Donation.belongsTo(User, { foreignKey: 'receiver_id', as: 'ReceiverUser' });
+User.hasMany(Donation, { foreignKey: 'donor_id', as: 'DonorDonations' });
+User.hasMany(Donation, { foreignKey: 'receiver_id', as: 'ReceiverDonations' });
+Donation.belongsTo(User, { foreignKey: 'donor_id', as: 'Donor' });
+Donation.belongsTo(User, { foreignKey: 'receiver_id', as: 'Receiver' });
 
-// Requests - DonationOffers
-Request.hasMany(DonationOffer, { foreignKey: 'request_id' });
-DonationOffer.belongsTo(Request, { foreignKey: 'request_id' });
+// Area - Communities
+Area.hasMany(Community, { foreignKey: 'area_id' });
+Community.belongsTo(Area, { foreignKey: 'area_id' });
 
-// Items - DonationOffers
-Item.hasMany(DonationOffer, { foreignKey: 'item_id' });
-DonationOffer.belongsTo(Item, { foreignKey: 'item_id' });
+User.hasMany(Community, { foreignKey: 'user_id' });
+Community.belongsTo(User, { foreignKey: 'user_id' });
 
-// Users (donor) - DonationOffers
-User.hasMany(DonationOffer, { foreignKey: 'donor_id' });
-DonationOffer.belongsTo(User, { foreignKey: 'donor_id' });
+// Community - Documents
+Community.hasMany(Document, { foreignKey: 'community_id' });
+Document.belongsTo(Community, { foreignKey: 'community_id' });
 
+Category.hasMany(Item, { foreignKey: "category_id" });
+Item.belongsTo(Category, { foreignKey: "category_id" });
+
+Category.hasMany(Request, { foreignKey: "category_id" });
+Request.belongsTo(Category, { foreignKey: "category_id" });
+
+Area.hasMany(Request, { foreignKey: "area_id" });
+Request.belongsTo(Area, { foreignKey: "area_id" });
+
+Request.hasMany(Item, { foreignKey: "request_id" });
+Item.belongsTo(Request, { foreignKey: "request_id" });
+
+Area.hasMany(Request, { foreignKey: "area_id" });
+Request.belongsTo(Area, { foreignKey: "area_id" });
+
+Area.hasMany(Donation, { foreignKey: "area_id" });
+Donation.belongsTo(Area, { foreignKey: "area_id" });
 
 // Export
 module.exports = {
@@ -63,6 +80,7 @@ module.exports = {
   Item,
   Request,
   Donation,
-  DonationOffer,
-  Document
+  Document,
+  Community,
+  Category
 };

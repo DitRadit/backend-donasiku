@@ -19,9 +19,9 @@ const sequelize = new Sequelize(
 (async () => {
   try {
     await sequelize.authenticate();
-    console.log('✅ Connected to MySQL (XAMPP) successfully.');
+    console.log('Connected to MySQL (XAMPP) successfully.');
   } catch (err) {
-    console.error('❌ Unable to connect to MySQL:', err);
+    console.error('Unable to connect to MySQL:', err);
   }
 })();
 

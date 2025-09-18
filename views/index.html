@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Donasiku Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+
+    <!-- Login Page -->
+    <div id="loginPage" class="w-full max-w-md bg-white p-6 rounded-xl shadow-lg">
+        <h2 class="text-2xl font-bold text-center mb-6">Login</h2>
+        <input id="username" type="text" placeholder="Username" class="w-full mb-4 p-2 border rounded" />
+        <input id="password" type="password" placeholder="Password" class="w-full mb-4 p-2 border rounded" />
+        <button onclick="login()" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+            Login
+        </button>
+    </div>
+
+    <!-- Chat List Page -->
+    <div id="chatListPage" class="hidden w-full max-w-md bg-white p-6 rounded-xl shadow-lg">
+        <h2 class="text-xl font-bold mb-4">Your Chats</h2>
+
+        <div class="flex mb-4">
+            <input id="targetUserId" type="text" placeholder="Target User ID" class="flex-1 p-2 border rounded-l" />
+            <button onclick="createRoom()" class="bg-green-500 text-white px-4 rounded-r hover:bg-green-600">+</button>
+        </div>
+
+        <ul id="chatRooms" class="space-y-2"></ul>
+    </div>
+
+    <!-- Chat Room Page -->
+    <div id="chatRoomPage" class="hidden w-full max-w-md bg-white p-6 rounded-xl shadow-lg flex flex-col h-[500px]">
+        <h2 id="roomTitle" class="text-xl font-bold mb-4">Room Chat</h2>
+        <div id="messages" class="flex-1 overflow-y-auto border p-2 rounded mb-4 space-y-2"></div>
+        <div class="flex">
+            <input id="chatInput" type="text" placeholder="Type a message" class="flex-1 p-2 border rounded-l" />
+            <button onclick="sendMessage()"
+                class="bg-blue-500 text-white px-4 rounded-r hover:bg-blue-600">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:3000";
+        let socket, token, currentUserId, currentRoomId;
+
+        // Show/Hide pages
+        function showPage(pageId) {
+            document.getElementById("loginPage").classList.add("hidden");
+            document.getElementById("chatListPage").classList.add("hidden");
+            document.getElementById("chatRoomPage").classList.add("hidden");
+            document.getElementById(pageId).classList.remove("hidden");
+        }
+
+        // Helper decode JWT
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(
+                    atob(base64)
+                    .split('')
+                    .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                    .join('')
+                );
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Login
+        async function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            const res = await fetch(`${API_URL}/auth/login`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    username,
+                    password
+                })
+            });
+            const data = await res.json();
+
+            if (data.accessToken) {
+                token = data.accessToken;
+
+                // ✅ decode user id dari token
+                const decoded = parseJwt(token);
+                currentUserId = decoded.user_id;
+
+                initSocket();
+                loadRooms();
+                showPage("chatListPage");
+            } else {
+                alert(data.message || "Login failed");
+            }
+        }
+
+
+        // Init socket.io
+        function initSocket() {
+            socket = io(API_URL);
+            socket.on("connect", () => console.log("✅ Socket connected"));
+
+            socket.on("receiveMessage", (msg) => {
+                if (msg.roomId === currentRoomId) {
+                    renderMessage(msg);
+                }
+            });
+        }
+
+        // Load user rooms
+        async function loadRooms() {
+            try {
+                const res = await fetch(`${API_URL}/chat/rooms`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                const rooms = await res.json();
+
+                const list = document.getElementById("chatRooms");
+                list.innerHTML = "";
+
+                const currentIdStr = String(currentUserId);
+
+                rooms.forEach(room => {
+                    if (!room.users || Object.keys(room.users).length === 0) {
+                        console.warn("Room missing users:", room);
+                        return;
+                    }
+
+                    const otherUserEntry = Object.entries(room.users).find(
+                        ([id, user]) => id !== currentIdStr && user
+                    );
+
+                    const otherUserName = otherUserEntry && otherUserEntry[1] ?
+                        otherUserEntry[1].name || "???" :
+                        "???";
+
+                    const otherUserId = otherUserEntry ? otherUserEntry[0] : null;
+
+                    const li = document.createElement("li");
+                    li.className = "p-2 border rounded cursor-pointer hover:bg-gray-100";
+                    li.innerText = `Chat with ${otherUserName}`;
+                    li.onclick = () => openRoom(room.roomId, otherUserId, otherUserName); // ← kirim name
+                    list.appendChild(li);
+                });
+            } catch (err) {
+                console.error("❌ loadRooms error:", err);
+            }
+        }
+
+
+
+
+        // Create a new room
+        async function createRoom() {
+            const targetUserId = document.getElementById("targetUserId").value;
+            const res = await fetch(`${API_URL}/chat/room/${targetUserId}`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            const room = await res.json();
+            loadRooms();
+        }
+
+        // Open room
+        async function openRoom(roomId, targetUserId, targetUserName) {
+            currentRoomId = roomId;
+            document.getElementById("roomTitle").innerText = `Chat with ${targetUserName || "???"}`;
+            showPage("chatRoomPage");
+
+            // join socket room
+            socket.emit("joinRoom", roomId);
+
+            // ✅ load messages pakai roomId
+            const res = await fetch(`${API_URL}/chat/room/${roomId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            const messages = await res.json();
+
+            const messagesDiv = document.getElementById("messages");
+            messagesDiv.innerHTML = "";
+            messages.forEach(renderMessage);
+        }
+
+
+
+
+
+        // Render message
+        function renderMessage({
+            senderId,
+            message,
+            timestamp
+        }) {
+            const div = document.createElement("div");
+            div.className =
+                `p-2 rounded max-w-[75%] ${senderId === currentUserId ? "bg-blue-100 self-end ml-auto" : "bg-gray-200 mr-auto"}`;
+            div.innerText = message;
+            document.getElementById("messages").appendChild(div);
+            document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+        }
+
+        // Send message
+        function sendMessage() {
+            const input = document.getElementById("chatInput");
+            if (!input.value) return;
+
+            const msg = {
+                roomId: currentRoomId,
+                message: input.value,
+                senderId: currentUserId
+            };
+            socket.emit("sendMessage", msg);
+            input.value = "";
+        }
+    </script>
+</body>
+
+</html>

@@ -3,13 +3,12 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
-const router = express.Router();
 
 let refreshTokens = [];
 
 const generateAccessToken = (user) => {
     return jwt.sign(
-        {user_id: user.user_id, username: user.username, role: user.role },
+        {user_id: user.user_id, username: user.username, role: user.role, area_id: user.area_id },
         process.env.JWT_ACCESS_SECRET,
         {
             expiresIn: '15m'
@@ -19,7 +18,7 @@ const generateAccessToken = (user) => {
 
 const generateRefreshToken = (user) => {
     const refreshToken = jwt.sign(
-        {user_id: user.user_id, username: user.username, role: user.role },
+        {user_id: user.user_id, username: user.username, role: user.role, area_id: user.area_id },
         process.env.JWT_REFRESH_SECRET,
         {
             expiresIn: '7d'
@@ -29,26 +28,33 @@ const generateRefreshToken = (user) => {
     return refreshToken;
 };
 
-exports.register = async (req, res) => {
-    const { username, password, role, email, name, phone, address, area_id } = req.body;
 
-    try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = await User.create({
-            username,
-            password: hashedPassword,
-            role,
-            email,
-            name,
-            phone,
-            address,
-            area_id
-        });
-        const { password: _, ...safeUser } = newUser.toJSON();
-        res.json({ message: 'User registered successfully', user: safeUser});
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+exports.register = async (req, res) => {
+  const { username, email, password } = req.body;
+  const { role } = req.params; 
+
+  if (!username || !email || !password) {
+    return res.status(400).json({ message: "Username, email, and password are required" });
+  }
+
+  if (!["donor", "receiver"].includes(role)) {
+    return res.status(400).json({ message: "Invalid role" });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await User.create({
+      username,
+      email,
+      password: hashedPassword,
+      role, 
+    });
+
+    const { password: _, ...safeUser } = newUser.toJSON();
+    res.status(201).json({ message: "User registered successfully", user: safeUser });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 exports.login = async(req, res) => {
@@ -81,7 +87,6 @@ exports.refreshToken = (req, res) => {
         res.json({ accessToken });
     });
 };
-
 
 exports.logout = (req, res) => {
     const authHeader = req.headers['authorization'];

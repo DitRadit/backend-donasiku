@@ -5,11 +5,12 @@ module.exports = (sequelize, DataTypes) => {
     password: { type: DataTypes.STRING(255), allowNull: false },
     role: { type: DataTypes.ENUM('donor','receiver','admin'), allowNull: false, defaultValue: 'donor' },
     name: { type: DataTypes.STRING(150), allowNull: true },
-    email: { type: DataTypes.STRING(150), allowNull: true },
+    email: { type: DataTypes.STRING(150), allowNull: false},
     phone: { type: DataTypes.STRING(30), allowNull: true },
     address: { type: DataTypes.TEXT, allowNull: true },
     verified: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-    area_id: { type: DataTypes.INTEGER, allowNull: true }
+    area_id: { type: DataTypes.INTEGER, allowNull: true },
+    profile_url: { type: DataTypes.STRING(255), allowNull: true }
   }, {
     tableName: 'users',
     timestamps: false,
