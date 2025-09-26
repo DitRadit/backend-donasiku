@@ -16,7 +16,7 @@ const donationRouter = require('./routes/donationRouter');
 const categoryRouter = require('./routes/categoryRouter');
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 
 app.get('/', (req, res) => res.send('Donasiku API'));

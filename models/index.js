@@ -9,6 +9,7 @@ const Donation = require('./donationModel')(sequelize, Sequelize.DataTypes);
 const Document = require('./documentsModel')(sequelize, Sequelize.DataTypes);
 const Community = require('./communityModel')(sequelize, Sequelize.DataTypes);
 const Category = require('./categoryModel')(sequelize, Sequelize.DataTypes);
+const DonationLog = require("./donationLogModel")(sequelize, Sequelize.DataTypes);
 
 /* ====== Associations ====== */
 
@@ -62,14 +63,18 @@ Request.belongsTo(Category, { foreignKey: "category_id" });
 Area.hasMany(Request, { foreignKey: "area_id" });
 Request.belongsTo(Area, { foreignKey: "area_id" });
 
-Request.hasMany(Item, { foreignKey: "request_id" });
-Item.belongsTo(Request, { foreignKey: "request_id" });
-
-Area.hasMany(Request, { foreignKey: "area_id" });
-Request.belongsTo(Area, { foreignKey: "area_id" });
+Item.hasMany(Request, { foreignKey: "item_id", as: "requests" });
+Request.belongsTo(Item, { foreignKey: "item_id", as: "item" });
 
 Area.hasMany(Donation, { foreignKey: "area_id" });
 Donation.belongsTo(Area, { foreignKey: "area_id" });
+
+Donation.hasMany(DonationLog, { foreignKey: "donation_id" });
+DonationLog.belongsTo(Donation, { foreignKey: "donation_id" });
+
+User.hasMany(DonationLog, { foreignKey: "user_id" });
+DonationLog.belongsTo(User, { foreignKey: "user_id" });
+
 
 // Export
 module.exports = {
@@ -82,5 +87,6 @@ module.exports = {
   Donation,
   Document,
   Community,
+  DonationLog,
   Category
 };
