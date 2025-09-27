@@ -2,51 +2,9 @@
 
 This Postman collection, **Donasiku**, provides a set of endpoints for an application focused on managing donations, user authentication, profile management, document verification, community registration, and area/category management.
 
-## ⚙️ Instalasi dan Prasyarat
+## 🚀 Getting Started
 
-Koleksi ini dirancang untuk diuji terhadap server backend lokal yang berjalan, seperti yang ditunjukkan oleh Base URL: `http://localhost:3000`.
-
-### Prasyarat
-
-1.  **Postman:** Anda memerlukan aplikasi Postman (atau alat yang kompatibel) untuk mengimpor dan menjalankan koleksi ini.
-2.  **Server Backend:** Server backend untuk Donasiku harus berjalan secara lokal di `http://localhost:3000`.
-3.  **Database:** Anda memerlukan server database **MySQL** yang berjalan (biasanya di `localhost:3306`).
-4.  **Kredensial Layanan Eksternal:** Anda memerlukan akun dan kredensial untuk **Cloudinary** (untuk penyimpanan file) dan **Firebase** (untuk fungsionalitas chat/real-time).
-
----
-
-## 🔑 Konfigurasi Lingkungan (`.env`)
-
-Aplikasi backend Anda mengandalkan variabel lingkungan berikut untuk berfungsi. Anda harus membuat file **`.env`** di root proyek Anda dengan konfigurasi ini (sesuaikan jika ada perbedaan pada setup lokal Anda):
-
-```ini
-# Database Configuration
-DB_HOST=localhost
-DB_USER=root
-DB_PASS=
-DB_NAME=donasiku
-DB_PORT=3306
-DB_DIALECT=mysql
-
-# Application Port
-PORT=3000
-
-# JWT Secrets (for Authentication)
-JWT_ACCESS_SECRET=test
-JWT_REFRESH_SECRET=test
-
-# Cloudinary Configuration (for File Uploads)
-CLOUDINARY_CLOUD_NAME=drxyesjkl
-CLOUDINARY_API_KEY=436258253685135
-CLOUDINARY_API_SECRET=0UJOplfHNMAb3mx2f5ygErrbvE4
-
-# Firebase Configuration (for Real-time/Chat Services)
-FIREBASE_PROJECT_ID=donasiku-chat
-FIREBASE_PRIVATE_KEY_ID=4353dc261a581daf78a06c18a269b4d3daca57c7
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCr0Xf9ND/Aprj1\nmBFh2nsszrSl7mxq/p6il1g4iEDInXhf9R9BYLqlaS9W7zlj74TZi7H31Wx3ZW1H\npCWxYvVRhusOYviA/IP9VHExJ+osEmdJcf6BYwcjzd3mzqXU6L3yIFgtYwNhbIUB\nheykQHxnmdEm5t5ZAqH48tEKx1mn0YVH7UrycznGP0xFgYD9mqp9U/+HbV1dfPG1\nEKKRu8seuZQhhT9s5LdhJ/98Ps+5KZ/UlMbeKADj2g7DrWj3vTDfte/nAtfQ7rEq\nD25qHc7or5hIGfXIEgSq3V07duDVTgEpxNb0FE+PwoKvxW0MfdgErwtYP2NFS6hK\nz4UNxxO/AgMBAAECggEAPIj2j31DIOscq1rCdQl28Fh7iSKxjBjdZ0ePS4ul14iz\niotgUbZ0zCZ9CVILlEwlMEhpkXneV0qi7+TDavYEnI6+bjkseLV/A1gm8Tyw4oox\nXc0N8CQltdWoYtNX1eWSVqZSqtsBq+eCDQFUWKJnslCdQemBWTb2PjG+uN93lQpF\nhwuQijKjgyHGDKNtCxPFXHZz1BnK/UVzDg/hdkBWNtnx/YeufE/sPP1N8Q9yz/PG\n71BUl63pOWcZOT7tJE0Ht20O4TWmUNOrvUP0Pozu5IHI6rlaXpEAB1io2aflbfvn\n8He8M4+eOn0SaBxSF4Zx2aeTPOvotZCeuLcCN4YkQQKBgQDw9lqEq/1twIv3XrzZ\n3yXvJ5sTqf7szSmCqIJIwOvggua06+cqWRozIW31zD4JhjDnuPCF3QkNZ/KydqpZ\nDhAm0TXKPDi3MjIKBS9VRRcxoX3pibRs0PAJOLptWv/+Ju0KKkpY66oJURIem6/g\nH5umn089cOkkZrmWxgwawIU1rwKBgQC2inXA0rLBvGxLfrutAv7TxKOnNTNgw5Zr\nCnvGM4Lmj1DVahAZ9Kd0B5CViRgf/RqoazXfTiA/1kgkwDoYDyuhi4ggXVRdtFWr\ni9r1kmAdfrXkFseTp3fbHLbWCl177X5eWOkF1bol2OrrrqEttiE3+wibGOfM7Cu1\nqJ8x0YWW8QKBgBmMtZpdtjh98xlepT2gyJ/sHihenRY0xtMA1RerxRcAKkBCxzcZ\nTYrgX41xg5506RiY5n/7KOuP+w7rQDLDJ/lFs6Nm8UiTfPTNCfDLq6LqkbRCkqv7\nF4iSyEmyHXSwYe/y/gEhs9zbCMXQEjz8fP+U4s0L/NyMO999zmjDwxwnAoGAKUJA\nfVXiW5HYNHQvvVpI+NqgVuHafAuZSxZyhYkNFEnebm5rt0IqOzqefn4fOtO9m8Wn\nxpJlDajEY7IjL172cKwWF6KguBFTr9OLqSftm50RRb20XHZky9zAor5zBNjYUEDu\nYog9a+KMrrqo6akZ9wpBlrTZZ+MVuhij6uG9vTECgYBYwCSCJeYgNVhiQRU1GCgI\nyQQqLzMG5ehaDaQXvxj/5M8+5P+GLVQFtL2i1niinZStKC4TWCx/QQyXICrDAcch\n/VmqegBCrvWMc02/dKEdwd/CFf43Vxsj3c0JUoz6IQ/AxeIlQXR/YuJK44AL/vNd\nC4bDem5nMFeTeh5T0bY6/g==\n-----END PRIVATE KEY-----\n"
-FIREBASE_CLIENT_EMAIL=firebase-adminsdk-fbsvc@donasiku-chat.iam.gserviceaccount.com
-FIREBASE_CLIENT_ID=103578749137928933763
-FIREBASE_DB_URL=[https://donasiku-chat-default-rtdb.asia-southeast1.firebasedatabase.app](https://donasiku-chat-default-rtdb.asia-southeast1.firebasedatabase.app)
+This collection is designed to be run against a local development server, as indicated by the base URL: `http://localhost:3000`.
 
 ### Prerequisites
 
