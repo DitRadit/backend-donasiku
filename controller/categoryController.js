@@ -1,4 +1,3 @@
-// controller/categoryController.js
 const { Category } = require("../models");
 
 exports.createCategories = async (req, res) => {

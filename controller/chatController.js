@@ -49,7 +49,7 @@ exports.createRoom = async (req, res) => {
       messages
     });
   } catch (err) {
-    console.error("❌ createRoom error:", err);
+    console.error(" createRoom error:", err);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -76,7 +76,7 @@ exports.getUserRooms = async (req, res) => {
 
     return res.json(rooms);
   } catch (err) {
-    console.error("❌ getUserRooms error:", err);
+    console.error("getUserRooms error:", err);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -90,7 +90,7 @@ exports.getRoomMessages = async (req, res) => {
 
     return res.json(messages);
   } catch (err) {
-    console.error("❌ getRoomMessages error:", err);
+    console.error("getRoomMessages error:", err);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
