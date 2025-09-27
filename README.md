@@ -53,7 +53,6 @@ The requests are organized into the following folders (major feature areas):
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Profile** | `GET` | `/user/profile` | Bearer Token | - | Retrieves the currently authenticated user's profile. |
 | **Update Profile** | `PUT` | `/user/profile` | - | FormData (name, phone, address, area\_id, file) | Updates user profile details, including an optional file upload. |
-| **Get All User** | `GET` | *(URL not specified)* | - | - | Endpoint for fetching a list of all users. |
 | **testUploadProfile** | `POST` | `/documents/upload` | Bearer Token | FormData (file) | A general endpoint for uploading a file/document. |
 
 ---
