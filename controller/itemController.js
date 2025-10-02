@@ -157,6 +157,13 @@ exports.approveDonation = async (req, res) => {
     const request = await Request.findByPk(request_id);
     const item = await Item.findByPk(item_id);
 
+     if (request.area_id !== item.area_id) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Request and Item must be in the same area" 
+      });
+    }
+
     if (!request || !item) {
       return res.status(404).json({ success: false, message: "Request or item can't be found" });
     }

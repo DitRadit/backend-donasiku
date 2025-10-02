@@ -11,7 +11,7 @@ const generateAccessToken = (user) => {
         {user_id: user.user_id, username: user.username, role: user.role, area_id: user.area_id },
         process.env.JWT_ACCESS_SECRET,
         {
-            expiresIn: '15m'
+            expiresIn: '2h'
         }
     );
 };
