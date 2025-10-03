@@ -5,7 +5,7 @@ const generateRoomId = (user1, user2) => {
   return user1 < user2 ? `${user1}_${user2}` : `${user2}_${user1}`;
 };
 
-exports.createRoom = async (req, res) => {
+const createRoom = async (req, res) => {
   try {
     const currentUserId = req.user.user_id;
     const targetUserId = parseInt(req.params.targetUserId, 10);
@@ -49,13 +49,12 @@ exports.createRoom = async (req, res) => {
       messages
     });
   } catch (err) {
-    console.error(" createRoom error:", err);
+    console.error("createRoom error:", err);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
-
-exports.getUserRooms = async (req, res) => {
+const getUserRooms = async (req, res) => {
   try {
     const currentUserId = req.user.user_id;
 
@@ -81,7 +80,7 @@ exports.getUserRooms = async (req, res) => {
   }
 };
 
-exports.getRoomMessages = async (req, res) => {
+const getRoomMessages = async (req, res) => {
   try {
     const { roomId } = req.params;
 
@@ -95,3 +94,9 @@ exports.getRoomMessages = async (req, res) => {
   }
 };
 
+module.exports = {
+  createRoom,
+  getUserRooms,
+  getRoomMessages,
+  generateRoomId
+};

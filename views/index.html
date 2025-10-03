@@ -132,29 +132,20 @@
                 list.innerHTML = "";
 
                 const currentIdStr = String(currentUserId);
-
                 rooms.forEach(room => {
-                    if (!room.users || Object.keys(room.users).length === 0) {
-                        console.warn("Room missing users:", room);
-                        return;
-                    }
+                    const ids = room.roomId.split("_");
+                    const otherUserId = ids.find(id => id !== currentIdStr);
 
-                    const otherUserEntry = Object.entries(room.users).find(
-                        ([id, user]) => id !== currentIdStr && user
-                    );
-
-                    const otherUserName = otherUserEntry && otherUserEntry[1] ?
-                        otherUserEntry[1].name || "???" :
-                        "???";
-
-                    const otherUserId = otherUserEntry ? otherUserEntry[0] : null;
+                    // sementara tampilkan nama default
+                    const otherUserName = `User ${otherUserId}`;
 
                     const li = document.createElement("li");
                     li.className = "p-2 border rounded cursor-pointer hover:bg-gray-100";
                     li.innerText = `Chat with ${otherUserName}`;
-                    li.onclick = () => openRoom(room.roomId, otherUserId, otherUserName); // ← kirim name
+                    li.onclick = () => openRoom(room.roomId, otherUserId, otherUserName);
                     list.appendChild(li);
                 });
+
             } catch (err) {
                 console.error("❌ loadRooms error:", err);
             }

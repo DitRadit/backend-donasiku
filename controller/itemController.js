@@ -1,6 +1,8 @@
 const { Item, Request, User, Donation, Category, Area } = require("../models");
 const streamifier = require("streamifier");
+const { generateRoomId } = require("./chatController");
 const cloudinary = require("../config/cloudinary");
+const { db } = require('../config/firebase');
 
 
 exports.createItem = async (req, res) => {
@@ -210,6 +212,29 @@ exports.approveDonation = async (req, res) => {
         address: request.address,
         area_id: request.area_id
       });
+
+    const donorId = donation.donor_id;
+    const receiverId = donation.receiver_id;
+    const roomId = generateRoomId(donorId, receiverId);
+
+    const roomRef = db.ref(`rooms/${roomId}`);
+    const snapshot = await roomRef.once("value");
+
+    if (!snapshot.exists()) {
+      const donor = await User.findByPk(donorId);
+      const receiver = await User.findByPk(receiverId);
+
+      await roomRef.set({
+        users: {
+          [donorId]: { name: donor.name },
+          [receiverId]: { name: receiver.name }
+        },
+        createdAt: Date.now()
+      });
+
+      await db.ref(`userRooms/${donorId}/${roomId}`).set(true);
+      await db.ref(`userRooms/${receiverId}/${roomId}`).set(true);
+    }
 
       return res.status(201).json({
         success: true,
